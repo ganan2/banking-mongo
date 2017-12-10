@@ -1,5 +1,9 @@
 package com.banking.api.controller;
 
+import java.security.Principal;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -7,39 +11,44 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.banking.api.dao.RoleDao;
+import com.banking.api.domain.PrimaryAccount;
+import com.banking.api.domain.SavingsAccount;
 import com.banking.api.domain.User;
+import com.banking.api.domain.security.UserRole;
 import com.banking.api.service.UserService;
 
 @Controller
 public class HomeController {
-
+	
 	@Autowired
 	private UserService userService;
 	
-	/** Because of @Controller, this class will be registered as a bean in Spring container. */
+	@Autowired
+    private RoleDao roleDao;
+	
 	@RequestMapping("/")
-	public String home(){
-		/** Because of @RequestMapping, Spring looks for corresponding file in template */
+	public String home() {
 		return "redirect:/index";
 	}
 	
 	@RequestMapping("/index")
-	public String index(){
-		return "index";
-	}
+    public String index() {
+        return "index";
+    }
 	
 	@RequestMapping(value = "/signup", method = RequestMethod.GET)
-	public String signup(Model model){
-		User user = new User();
-		
-		model.addAttribute("user", user);
-		
-		return "signup";
-	}
+    public String signup(Model model) {
+        User user = new User();
+
+        model.addAttribute("user", user);
+
+        return "signup";
+    }
 	
 	@RequestMapping(value = "/signup", method = RequestMethod.POST)
     public String signupPost(@ModelAttribute("user") User user,  Model model) {
-/** @ModelAttribute Retrieves the values posted and assigns to those in the object in the arguments of the method */
+
         if(userService.checkUserExists(user.getUsername(), user.getEmail()))  {
 
             if (userService.checkEmailExists(user.getEmail())) {
@@ -52,11 +61,24 @@ public class HomeController {
 
             return "signup";
         } else {
+        	 Set<UserRole> userRoles = new HashSet<>();
+             userRoles.add(new UserRole(user, roleDao.findByName("ROLE_USER")));
 
-            userService.save(user);
+            userService.createUser(user, userRoles);
 
             return "redirect:/";
         }
     }
+	
+	@RequestMapping("/userFront")
+	public String userFront(Principal principal, Model model) {
+        User user = userService.findByUsername(principal.getName());
+        PrimaryAccount primaryAccount = user.getPrimaryAccount();
+        SavingsAccount savingsAccount = user.getSavingsAccount();
 
+        model.addAttribute("primaryAccount", primaryAccount);
+        model.addAttribute("savingsAccount", savingsAccount);
+
+        return "userFront";
+    }
 }

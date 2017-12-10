@@ -13,6 +13,7 @@ import com.banking.api.dao.PrimaryAccountDao;
 import com.banking.api.dao.PrimaryTransactionDao;
 import com.banking.api.dao.RecipientDao;
 import com.banking.api.dao.SavingsAccountDao;
+import com.banking.api.dao.SavingsTransactionDao;
 import com.banking.api.domain.PrimaryAccount;
 import com.banking.api.domain.PrimaryTransaction;
 import com.banking.api.domain.Recipient;
@@ -21,7 +22,6 @@ import com.banking.api.domain.SavingsTransaction;
 import com.banking.api.domain.User;
 import com.banking.api.service.TransactionService;
 import com.banking.api.service.UserService;
-import com.banking.api.dao.SavingsTransactionDao;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
